@@ -1,0 +1,48 @@
+<html>
+    <head>
+        <link href="./dist/jquery.textcomplete.css" rel="stylesheet">
+    </head>
+
+    <body>
+        <p>Hit @ to start the autocomplete.</p>
+
+        <form>
+            <textarea id="txtTest" cols="80" rows="20"></textarea>
+        </form>
+
+        <script src="./lib/jquery-1.11.3.js"></script>
+
+        <script src="./src/main.js"></script>
+        <script src="./src/completer.js"></script>
+        <script src="./src/dropdown.js"></script>
+        <script src="./src/strategy.js"></script>
+        <script src="./src/adapter.js"></script>
+        <script src="./src/textarea.js"></script>
+        <script src="./src/ie_textarea.js"></script>
+        <script src="./src/content_editable.js"></script>
+        <script>
+            $('#txtTest').textcomplete(
+                [
+                    {
+                        database: ["<", ">", "=", "TEXT VALUE"],
+                        match: /(^|\s)@(\w*)$/,
+                        search: function (term, callback) {
+                            callback($.map(this.database, function (word) {
+                                return word.indexOf(term) === 0 ? word : null;
+                            }))
+                        },
+                        template: function (value) {
+                            return '<b>' + value + '</b>';
+                        },
+                        replace: function (value) {
+                            // return 'before existing $1@' + value + ' after replacement value ';
+                            // can also use an array to put cursor between two string values.
+                            // return ['<' + value + '>', '</' + value + '>'];
+                            return  '$1[[' + value + "]]";
+                        }
+                    }
+                ]
+            );
+        </script>
+    </body>
+</html>
