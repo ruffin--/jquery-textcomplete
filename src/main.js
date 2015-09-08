@@ -5,35 +5,41 @@
  * License:    MIT (https://github.com/yuku-t/jquery-textcomplete/blob/master/LICENSE)
  * Author:     Yuku Takahashi
  */
+ /*global jQuery */
 
-if (typeof jQuery === 'undefined') {
+if (jQuery === 'undefined') {
   throw new Error('jQuery.textcomplete requires jQuery');
 }
 
-+function ($) {
+(function ($) {
   'use strict';
+  var warn, id;
 
-  var warn = function (message) {
+  warn = function (message) {
     if (console.warn) { console.warn(message); }
   };
 
-  var id = 1;
+  id = 1;
 
   $.fn.textcomplete = function (strategies, option) {
-    var args = Array.prototype.slice.call(arguments);
+    var args, self, $this, completer;
+
+    args = Array.prototype.slice.call(arguments);
     return this.each(function () {
-      var self = this;
-      var $this = $(this);
-      var completer = $this.data('textComplete');
+      self = this;
+      $this = $(this);
+      completer = $this.data('textComplete');
       if (!completer) {
-        option || (option = {});
+        option = option || {};
         option._oid = id++;  // unique object id
         completer = new $.fn.textcomplete.Completer(this, option);
         $this.data('textComplete', completer);
       }
       if (typeof strategies === 'string') {
-        if (!completer) return;
-        args.shift()
+        if (!completer) {
+          return;
+        }
+        args.shift();
         completer[strategies].apply(completer, args);
         if (strategies === 'destroy') {
           $this.removeData('textComplete');
@@ -58,4 +64,4 @@ if (typeof jQuery === 'undefined') {
     });
   };
 
-}(jQuery);
+}(jQuery));
