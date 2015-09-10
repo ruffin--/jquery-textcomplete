@@ -1,5 +1,8 @@
-+function ($) {
+/*global jQuery */
+(function ($) {
   'use strict';
+
+  var lock, isString, isFunction, uniqueId;
 
   // Exclusive execution control utility.
   //
@@ -23,12 +26,14 @@
   //   lockedFunc();  // none
   //
   // Returns a wrapped function.
-  var lock = function (func) {
+  lock = function (func) {
     var locked, queuedArgsToReplay;
 
     return function () {
+      var args, self;
+
       // Convert arguments into a real array.
-      var args = Array.prototype.slice.call(arguments);
+      args = Array.prototype.slice.call(arguments);
       if (locked) {
         // Keep a copy of this argument list to replay later.
         // OK to overwrite a previous value because we only replay
@@ -37,7 +42,7 @@
         return;
       }
       locked = true;
-      var self = this;
+      self = this;
       args.unshift(function replayOrFree() {
         if (queuedArgsToReplay) {
           // Other request(s) arrived while we were locked.
@@ -57,15 +62,15 @@
     };
   };
 
-  var isString = function (obj) {
+  isString = function (obj) {
     return Object.prototype.toString.call(obj) === '[object String]';
   };
 
-  var isFunction = function (obj) {
+  isFunction = function (obj) {
     return Object.prototype.toString.call(obj) === '[object Function]';
   };
 
-  var uniqueId = 0;
+  uniqueId = 0;
 
   function Completer(element, option) {
     this.$el        = $(element);
@@ -74,13 +79,13 @@
     this.views      = [];
     this.option     = $.extend({}, Completer._getDefaults(), option);
 
-    if (!this.$el.is('input[type=text]') && !this.$el.is('textarea') && !element.isContentEditable && element.contentEditable != 'true') {
+    if (!this.$el.is('input[type=text]') && !this.$el.is('textarea') && !element.isContentEditable && element.contentEditable !== 'true') {
       throw new Error('textcomplete must be called on a Textarea or a ContentEditable.');
     }
 
     if (element === document.activeElement) {
       // element has already been focused. Initialize view objects immediately.
-      this.initialize()
+      this.initialize();
     } else {
       // Initialize view objects lazily.
       var self = this;
@@ -97,7 +102,7 @@
     }
 
     return Completer.DEFAULTS;
-  }
+  };
 
   $.extend(Completer.prototype, {
     // Public properties
@@ -114,10 +119,11 @@
     // --------------
 
     initialize: function () {
-      var element = this.$el.get(0);
+      var element, Adapter, viewName;
+
+      element = this.$el.get(0);
       // Initialize view objects.
       this.dropdown = new $.fn.textcomplete.Dropdown(element, this, this.option);
-      var Adapter, viewName;
       if (this.option.adapter) {
         Adapter = this.option.adapter;
       } else {
@@ -144,11 +150,13 @@
 
     // Invoke textcomplete.
     trigger: function (text, skipUnchangedTerm) {
+      var term, searchQuery;
+
       if (!this.dropdown) { this.initialize(); }
-      text != null || (text = this.adapter.getTextFromHeadToCaret());
-      var searchQuery = this._extractSearchQuery(text);
+      text = text || this.adapter.getTextFromHeadToCaret();
+      searchQuery = this._extractSearchQuery(text);
       if (searchQuery.length) {
-        var term = searchQuery[1];
+        term = searchQuery[1];
         // Ignore shift-key, ctrl-key and so on.
         if (skipUnchangedTerm && this._term === term) { return; }
         this._term = term;
@@ -196,17 +204,19 @@
     // Returns an array including the strategy, the query term and the match
     // object if the text matches an strategy; otherwise returns an empty array.
     _extractSearchQuery: function (text) {
-      for (var i = 0; i < this.strategies.length; i++) {
-        var strategy = this.strategies[i];
-        var context = strategy.context(text);
+      var i, strategy, context, matchRegexp, match;
+
+      for (i = 0; i < this.strategies.length; i++) {
+        strategy = this.strategies[i];
+        context = strategy.context(text);
         if (context || context === '') {
-          var matchRegexp = isFunction(strategy.match) ? strategy.match(text) : strategy.match;
+          matchRegexp = isFunction(strategy.match) ? strategy.match(text) : strategy.match;
           if (isString(context)) { text = context; }
-          var match = text.match(matchRegexp);
+          match = text.match(matchRegexp);
           if (match) { return [strategy, match[strategy.index], match]; }
         }
       }
-      return []
+      return [];
     },
 
     // Call the search method of selected strategy..
@@ -245,4 +255,4 @@
   });
 
   $.fn.textcomplete.Completer = Completer;
-}(jQuery);
+}(jQuery));
