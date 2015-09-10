@@ -22,11 +22,11 @@ if (jQuery === 'undefined') {
   id = 1;
 
   $.fn.textcomplete = function (strategies, option) {
-    var args, self, $this, completer;
+    var args, domContext, $this, completer;
 
     args = Array.prototype.slice.call(arguments);
     return this.each(function () {
-      self = this;
+      domContext = this;
       $this = $(this);
       completer = $this.data('textComplete');
       if (!completer) {
@@ -57,7 +57,7 @@ if (jQuery === 'undefined') {
           });
         });
         completer.register($.fn.textcomplete.Strategy.parse(strategies, {
-          el: self,
+          el: domContext,
           $el: $this
         }));
       }
